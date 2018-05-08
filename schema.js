@@ -3,7 +3,8 @@ import {
     GraphQLInt,
     GraphQLString,
     GraphQLList,
-    GraphQLSchema
+    GraphQLSchema,
+    GraphQLNonNull
 } from 'graphql';
 import Db from './db.js';
 
@@ -80,6 +81,37 @@ const Post = new GraphQLObjectType({
 });
 
 
+const AddData = new GraphQLObjectType({
+    name: 'AddData',
+    description: 'Add Data object',
+    fields: () => {
+        return {
+            addPerson: {
+                type: Person,
+                args: {
+                    firstName: {
+                        type: new GraphQLNonNull(GraphQLString)
+                    },
+                    lastName: {
+                        type: new GraphQLNonNull(GraphQLString)
+                    },
+                    email: {
+                        type: new GraphQLNonNull(GraphQLString)
+                    }
+                },
+                resolve(_, args){
+                    return Db.models.person.create({
+                        firstName: args.firstName,
+                        lastName: args.lastName,
+                        email: args.email.toLowerCase()
+                    });
+                }
+            }
+        }
+    }
+});
+
+
 const Query = new GraphQLObjectType({
     name: 'Query',
     description: 'Query object',
@@ -110,8 +142,10 @@ const Query = new GraphQLObjectType({
     }
 });
 
+
 const Schema = new GraphQLSchema({
-    query: Query
+    query: Query,
+    mutation:  AddData
 });
 
 export default Schema;
